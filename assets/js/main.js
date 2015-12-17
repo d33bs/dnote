@@ -35,6 +35,7 @@ var InputView = Backbone.View.extend({
 	events : {
     		"keyup textarea" : "update"
 	},
+        //clean up the input to ensure proper replacement values
     	clean : function(raw){
 		var s = raw;
 		// smart single quotes and apostrophe
@@ -55,12 +56,14 @@ var InputView = Backbone.View.extend({
 		s = s.replace(/[\u02DC|\u00A0]/g, " ");
 		return s;
 	},
+        //parse content entered into the template (top left) input area and create variable input areas (bottom left)
 	update : function(){
 		var text = this.clean($("#input textarea").val());
 		//	var output_var = text.match(/<(.*?)>/g);
 		var output_var = text.match(/(\[(.*?)\]|<(.*?)>)/g);
 		output_var = _.uniq(output_var, false);
 		var view = this;
+                //remove live status to ensure any fields are destroyed that don't exist anymore
 		this.options.parent.vars.remove_live();
 		$.each(output_var, function(i,val){
 			var search_name = val.substring(1,val.length-1); 
@@ -85,12 +88,15 @@ var VarsView = Backbone.View.extend({
 	events : {	
     		"keyup textarea" : "update"
 	},
+        //add live status to already existing input fields
     	add_live : function(ele){
 		$("#"+ele).addClass("live");
 	},
+        //remove live status to no longer existing input fields
     	remove_live : function(){
 		$("#vars textarea").removeClass("live");
 	},
+        //remove the dead, or non-live, input fields
     	remove_dead : function(ele){
 		$.each($("#vars textarea"),function(i,val){
 			if(!$(val).hasClass("live")){
@@ -98,9 +104,11 @@ var VarsView = Backbone.View.extend({
 			}
 		});	
 	},
+        //add new input field with the status of live
     	add_input : function(var_name){
 		$(this.el).append('<div class="row"><b>'+var_name+'</b><textarea id="'+var_name+'" class="live"></textarea></div>');
 	},
+        //update the final output with variable input based on template
 	update : function(e){
 		var text = $("#input textarea").val();
 		var new_text = "";
